@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">Hello</string>
+    <string name="text1">word</string>
+    <string name="textvalue">Hello  world!</string>
+    <string name="hint">请输入温度</string>
+    <string name="textv">转换</string>
+    <string name="appname">温度转换器</string>
+    <string name="resas">结果为：</string>
+    <string name="hint2">输入格式为以C（摄氏度）或F（华氏度）结尾</string>
+</resources>

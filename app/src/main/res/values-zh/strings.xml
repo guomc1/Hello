@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">你好</string>
+    <string name="text1">汤姆猫</string>
+    <string name="appname">温度转换器</string>
+    <string name="resas">结果为</string>
+    <string name="hint2">输入格式为以C（摄氏度）或F（华氏度）结尾</string>
+</resources>
