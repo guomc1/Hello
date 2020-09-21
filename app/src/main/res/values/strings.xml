@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Hello</string>
+    <string name="app_name">CourtCounter</string>
     <string name="text1">word</string>
     <string name="textvalue">Hello  world!</string>
     <string name="hint">请输入温度</string>
@@ -7,4 +7,12 @@
     <string name="appname">温度转换器</string>
     <string name="resas">结果为：</string>
     <string name="hint2">输入格式为以C（摄氏度）或F（华氏度）结尾</string>
+    <string name="appname2">计分器</string>
+    <string name="add1">FREE THROW</string>
+    <string name="add2">+2 POINTS</string>
+    <string name="add3">+3 POINTS</string>
+    <string name="reset">RESET</string>
+    <string name="zero">0</string>
+    <string name="teamA">teamA</string>
+    <string name="teamB">teamB</string>
 </resources>
