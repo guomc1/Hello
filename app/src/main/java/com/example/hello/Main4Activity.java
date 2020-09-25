@@ -18,9 +18,10 @@ public class Main4Activity extends AppCompatActivity {
         setContentView(R.layout.activity_main4);
 
         Intent intent = getIntent();
-        dollar = intent.getDoubleExtra("dollar",0.0);
-        euro = intent.getDoubleExtra("euro",0.0);
-        won = intent.getDoubleExtra("won",0.0);
+        Bundle bundle = intent.getExtras();
+        dollar = bundle.getDouble("dollar",0.0);
+        euro = bundle.getDouble("euro",0.0);
+        won = bundle.getDouble("won",0.0);
 
         editText1 = findViewById(R.id.editText5);
         editText2 = findViewById(R.id.editText6);
@@ -45,9 +46,12 @@ public class Main4Activity extends AppCompatActivity {
             return;
         }
         Intent intent = new Intent(this,MainActivity.class);
-        intent.putExtra("dollar",dollar);
-        intent.putExtra("euro",euro);
-        intent.putExtra("won",won);
-        startActivity(intent);
+        Bundle bundle = new Bundle();
+        bundle.putDouble("dollar",dollar);
+        bundle.putDouble("euro",euro);
+        bundle.putDouble("won",won);
+        intent.putExtras(bundle);
+        setResult(1,intent);
+        finish();
     }
 }

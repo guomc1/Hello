@@ -1,5 +1,6 @@
 package com.example.hello;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ShareCompat;
 
@@ -29,11 +30,9 @@ public class MainActivity extends AppCompatActivity {
         editText = findViewById(R.id.editText10);
         textView = findViewById(R.id.textView5);
 
-        Intent intent = getIntent();
-
-        dollar = intent.getDoubleExtra("dollar",0.146869);
-        euro = intent.getDoubleExtra("euro",0.125881);
-        won = intent.getDoubleExtra("won",171.924559);
+        dollar = 0.146869;
+        euro = 0.125881;
+        won = 171.924559;
 
     }
 
@@ -112,9 +111,22 @@ public class MainActivity extends AppCompatActivity {
 
     public void config(View v){
         Intent intent = new Intent(this,Main4Activity.class);
-        intent.putExtra("dollar",dollar);
-        intent.putExtra("euro",euro);
-        intent.putExtra("won",won);
-        startActivity(intent);
+        Bundle bundle = new Bundle();
+        bundle.putDouble("dollar",dollar);
+        bundle.putDouble("euro",euro);
+        bundle.putDouble("won",won);
+        intent.putExtras(bundle);
+        startActivityForResult(intent,1);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        if(requestCode == 1 && resultCode == 1){
+            Bundle bundle = data.getExtras();
+            dollar = bundle.getDouble("dollar",0.0);
+            euro = bundle.getDouble("euro",0.0);
+            won = bundle.getDouble("won",0.0);
+        }
+        super.onActivityResult(requestCode, resultCode, data);
     }
 }
