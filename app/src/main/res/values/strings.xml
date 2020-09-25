@@ -15,4 +15,12 @@
     <string name="zero">0</string>
     <string name="teamA">teamA</string>
     <string name="teamB">teamB</string>
+    <string name="inputRMB">input RMB</string>
+    <string name="dollar">dollar</string>
+    <string name="euro">euro</string>
+    <string name="won">won</string>
+    <string name="result">result:</string>
+    <string name="nu"> </string>
+    <string name="config">config</string>
+    <string name="save">save</string>
 </resources>
