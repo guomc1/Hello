@@ -2,7 +2,9 @@ package com.example.hello;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
@@ -17,11 +19,16 @@ public class Main4Activity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main4);
 
-        Intent intent = getIntent();
-        Bundle bundle = intent.getExtras();
-        dollar = bundle.getDouble("dollar",0.0);
-        euro = bundle.getDouble("euro",0.0);
-        won = bundle.getDouble("won",0.0);
+//        Intent intent = getIntent();
+//        Bundle bundle = intent.getExtras();
+//        dollar = bundle.getDouble("dollar",0.0);
+//        euro = bundle.getDouble("euro",0.0);
+//        won = bundle.getDouble("won",0.0);
+
+        SharedPreferences sp = getSharedPreferences("myrate", Activity.MODE_PRIVATE);
+        dollar = (double)sp.getFloat("dollar",0.0f);
+        euro = (double)sp.getFloat("euro",0.0f);
+        won = (double)sp.getFloat("won",0.0f);
 
         editText1 = findViewById(R.id.editText5);
         editText2 = findViewById(R.id.editText6);
@@ -46,11 +53,18 @@ public class Main4Activity extends AppCompatActivity {
             return;
         }
         Intent intent = new Intent(this,MainActivity.class);
-        Bundle bundle = new Bundle();
-        bundle.putDouble("dollar",dollar);
-        bundle.putDouble("euro",euro);
-        bundle.putDouble("won",won);
-        intent.putExtras(bundle);
+
+        SharedPreferences sp = getSharedPreferences("myrate", Activity.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sp.edit();
+        editor.putFloat("dollar",(float)dollar);
+        editor.putFloat("euro",(float)euro);
+        editor.putFloat("won",(float)won);
+        editor.apply();
+//        Bundle bundle = new Bundle();
+//        bundle.putDouble("dollar",dollar);
+//        bundle.putDouble("euro",euro);
+//        bundle.putDouble("won",won);
+//        intent.putExtras(bundle);
         setResult(1,intent);
         finish();
     }
