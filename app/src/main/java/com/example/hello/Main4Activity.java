@@ -23,14 +23,20 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.IOException;
+import java.lang.reflect.Array;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 public class Main4Activity extends AppCompatActivity implements Runnable{
 
+    SharedPreferences sp;
     EditText editText1,editText2,editText3;
     ListView listView;
     Handler handler;
+    String allRate,date;
     double dollar,euro,won;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,7 +49,7 @@ public class Main4Activity extends AppCompatActivity implements Runnable{
 //        euro = bundle.getDouble("euro",0.0);
 //        won = bundle.getDouble("won",0.0);
 
-        SharedPreferences sp = getSharedPreferences("myrate", Activity.MODE_PRIVATE);
+        sp = getSharedPreferences("myrate", Activity.MODE_PRIVATE);
         dollar = (double)sp.getFloat("dollar",0.0f);
         euro = (double)sp.getFloat("euro",0.0f);
         won = (double)sp.getFloat("won",0.0f);
@@ -58,6 +64,32 @@ public class Main4Activity extends AppCompatActivity implements Runnable{
         editText2.setText("euro rate =" + euro);
         editText3.setText("won rate =" + won);
 
+        sp = getSharedPreferences("rate", Activity.MODE_PRIVATE);
+        date = sp.getString("date","");
+
+        //当前日期
+        Date now = new Date();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        String nowDate = sdf.format(now);
+
+        //是同一天则直接从文件中读出数据
+        if(date.equals(nowDate)){
+            allRate = sp.getString("allRate","");
+            String[] rateArray = allRate.split(",");
+            List<String> list = Arrays.asList(rateArray);
+            ListAdapter adapter = new ArrayAdapter<String>(Main4Activity.this,android.R.layout.simple_list_item_1,list);
+            listView.setAdapter(adapter);
+        }
+        //不是同一天则从网络中获取数据，写入新的数据和日期
+        else{
+            getData();
+            SharedPreferences.Editor editor = sp.edit();
+            editor.putString("date",nowDate);
+            editor.apply();
+        }
+    }
+
+    private void getData(){
         Thread t = new Thread(this);
         t.start();
 
@@ -65,9 +97,19 @@ public class Main4Activity extends AppCompatActivity implements Runnable{
             @Override
             public void handleMessage(Message msg) {
                 if(msg.what == 2){
+                    String allRate = "";
                     List<String> list = (List<String>) msg.obj;
                     ListAdapter adapter = new ArrayAdapter<String>(Main4Activity.this,android.R.layout.simple_list_item_1,list);
                     listView.setAdapter(adapter);
+
+                    for(String s:list){
+                        allRate += s + ",";
+                    }
+
+                    sp = getSharedPreferences("rate", Activity.MODE_PRIVATE);
+                    SharedPreferences.Editor editor = sp.edit();
+                    editor.putString("allRate",allRate);
+                    editor.apply();
                 }
                 super.handleMessage(msg);
             }
@@ -146,7 +188,7 @@ public class Main4Activity extends AppCompatActivity implements Runnable{
         Element e = null;
         for(int i = 1;i < trs.size();i++){
             e = trs.get(i);
-            list.add(e.getElementsByTag("td").get(0).text() + ":" + e.getElementsByTag("td").get(5).text());
+            list.add(e.getElementsByTag("td").get(0).text() + ":  " + e.getElementsByTag("td").get(5).text());
         }
 
         return list;

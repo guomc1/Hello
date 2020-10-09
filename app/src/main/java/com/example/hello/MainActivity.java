@@ -82,6 +82,8 @@ public class MainActivity extends AppCompatActivity implements Runnable{
 
     }
 
+
+
 //    public void change(View v){
 //        String str = editText.getText().toString();
 //        Double n = 0.0;
