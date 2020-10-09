@@ -41,5 +41,11 @@
             android:layout_height="wrap_content"
             android:onClick="save"
             android:text="@string/save" />
+
+        <ListView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/mylist"
+        />
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

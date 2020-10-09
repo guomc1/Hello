@@ -4,15 +4,33 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.LocusId;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
+import android.util.Log;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.ListAdapter;
+import android.widget.ListView;
 import android.widget.Toast;
 
-public class Main4Activity extends AppCompatActivity {
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+public class Main4Activity extends AppCompatActivity implements Runnable{
 
     EditText editText1,editText2,editText3;
+    ListView listView;
+    Handler handler;
     double dollar,euro,won;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,9 +52,26 @@ public class Main4Activity extends AppCompatActivity {
         editText2 = findViewById(R.id.editText6);
         editText3 = findViewById(R.id.editText7);
 
+        listView = findViewById(R.id.mylist);
+
         editText1.setText("dollar rate =" + dollar);
         editText2.setText("euro rate =" + euro);
         editText3.setText("won rate =" + won);
+
+        Thread t = new Thread(this);
+        t.start();
+
+        handler = new Handler(){
+            @Override
+            public void handleMessage(Message msg) {
+                if(msg.what == 2){
+                    List<String> list = (List<String>) msg.obj;
+                    ListAdapter adapter = new ArrayAdapter<String>(Main4Activity.this,android.R.layout.simple_list_item_1,list);
+                    listView.setAdapter(adapter);
+                }
+                super.handleMessage(msg);
+            }
+        };
     }
 
     public void save(View v){
@@ -67,5 +102,54 @@ public class Main4Activity extends AppCompatActivity {
 //        intent.putExtras(bundle);
         setResult(1,intent);
         finish();
+    }
+
+    @Override
+    public void run(){
+//        URL url = null;
+//        String html = "";
+//        try{
+//            url = new URL("https://www.usd-cny.com/bankofchina.htm");
+//            HttpsURLConnection http = (HttpsURLConnection) url.openConnection();
+//            InputStream in = http.getInputStream();
+//
+//            html = inputStream2String(in);
+//            Log.i(TAG, "run: html:" + html);
+//        }catch (MalformedURLException e){
+//            e.printStackTrace();
+//        } catch (IOException e){
+//            e.printStackTrace();
+//        }
+
+        String url = "https://www.usd-cny.com/bankofchina.htm";
+        Document doc = null;
+        try {
+            doc = Jsoup.connect(url).get();
+        }catch (IOException e){
+            e.printStackTrace();
+        }
+
+        List<String> message = getMessage(doc);
+
+        Message msg = handler.obtainMessage(2);
+        msg.obj = message;
+        handler.sendMessage(msg);
+    }
+
+    private List<String> getMessage(Document doc){
+        Elements tables = doc.getElementsByTag("table");
+        Element table = tables.get(0);
+
+        List<String> list = new ArrayList<>();
+
+        Elements trs = table.getElementsByTag("tr");
+        Element e = null;
+        for(int i = 1;i < trs.size();i++){
+            e = trs.get(i);
+            list.add(e.getElementsByTag("td").get(0).text() + ":" + e.getElementsByTag("td").get(5).text());
+        }
+
+        return list;
+
     }
 }
