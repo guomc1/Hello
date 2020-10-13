@@ -15,6 +15,7 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListAdapter;
 import android.widget.ListView;
+import android.widget.SimpleAdapter;
 import android.widget.Toast;
 
 import org.jsoup.Jsoup;
@@ -28,6 +29,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 public class Main4Activity extends AppCompatActivity implements Runnable{
@@ -76,13 +78,24 @@ public class Main4Activity extends AppCompatActivity implements Runnable{
         if(date.equals(nowDate)){
             allRate = sp.getString("allRate","");
             String[] rateArray = allRate.split(",");
-            List<String> list = Arrays.asList(rateArray);
-            ListAdapter adapter = new ArrayAdapter<String>(Main4Activity.this,android.R.layout.simple_list_item_1,list);
-            listView.setAdapter(adapter);
+            List<HashMap<String,String>> list = new ArrayList<>();
+            for(String s:rateArray){
+                HashMap<String,String> map = new HashMap<>();
+                map.put("itemTitle",s.split(":")[0]);
+                map.put("itemDetail",s.split(":")[1]);
+                list.add(map);
+            }
+            listView.setAdapter(new SimpleAdapter(Main4Activity.this,
+                    list,
+                    R.layout.list_item,
+                    new String[] {"itemTitle","itemDetail"},
+                    new int[] {R.id.itemTitle,R.id.itemDetail}));
         }
         //不是同一天则从网络中获取数据，写入新的数据和日期
         else{
+            //从网络中获取数据
             getData();
+
             SharedPreferences.Editor editor = sp.edit();
             editor.putString("date",nowDate);
             editor.apply();
@@ -98,12 +111,16 @@ public class Main4Activity extends AppCompatActivity implements Runnable{
             public void handleMessage(Message msg) {
                 if(msg.what == 2){
                     String allRate = "";
-                    List<String> list = (List<String>) msg.obj;
-                    ListAdapter adapter = new ArrayAdapter<String>(Main4Activity.this,android.R.layout.simple_list_item_1,list);
-                    listView.setAdapter(adapter);
+                    List<HashMap<String,String>> list = (List<HashMap<String,String>>) msg.obj;
 
-                    for(String s:list){
-                        allRate += s + ",";
+                    listView.setAdapter(new SimpleAdapter(Main4Activity.this,
+                            list,
+                            R.layout.list_item,
+                            new String[] {"itemTitle","itemDetail"},
+                            new int[] {R.id.itemTitle,R.id.itemDetail}));
+
+                    for(HashMap<String,String> map:list){
+                        allRate += map.get("itemTitle") + ":" + map.get("itemDetail") + ",";
                     }
 
                     sp = getSharedPreferences("rate", Activity.MODE_PRIVATE);
@@ -171,24 +188,27 @@ public class Main4Activity extends AppCompatActivity implements Runnable{
             e.printStackTrace();
         }
 
-        List<String> message = getMessage(doc);
+        List<HashMap<String,String>> message = getMessage(doc);
 
         Message msg = handler.obtainMessage(2);
         msg.obj = message;
         handler.sendMessage(msg);
     }
 
-    private List<String> getMessage(Document doc){
+    private List<HashMap<String,String>> getMessage(Document doc){
         Elements tables = doc.getElementsByTag("table");
         Element table = tables.get(0);
 
-        List<String> list = new ArrayList<>();
+        List<HashMap<String,String>> list = new ArrayList<>();
 
         Elements trs = table.getElementsByTag("tr");
         Element e = null;
         for(int i = 1;i < trs.size();i++){
             e = trs.get(i);
-            list.add(e.getElementsByTag("td").get(0).text() + ":  " + e.getElementsByTag("td").get(5).text());
+            HashMap<String,String> map = new HashMap<>();
+            map.put("itemTitle",e.getElementsByTag("td").get(0).text());
+            map.put("itemDetail",e.getElementsByTag("td").get(5).text());
+            list.add(map);
         }
 
         return list;
