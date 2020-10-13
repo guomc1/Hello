@@ -11,6 +11,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListAdapter;
@@ -32,7 +33,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
-public class Main4Activity extends AppCompatActivity implements Runnable{
+public class Main4Activity extends AppCompatActivity implements Runnable, AdapterView.OnItemClickListener{
 
     SharedPreferences sp;
     EditText editText1,editText2,editText3;
@@ -61,6 +62,7 @@ public class Main4Activity extends AppCompatActivity implements Runnable{
         editText3 = findViewById(R.id.editText7);
 
         listView = findViewById(R.id.mylist);
+        listView.setOnItemClickListener(this);
 
         editText1.setText("dollar rate =" + dollar);
         editText2.setText("euro rate =" + euro);
@@ -78,18 +80,22 @@ public class Main4Activity extends AppCompatActivity implements Runnable{
         if(date.equals(nowDate)){
             allRate = sp.getString("allRate","");
             String[] rateArray = allRate.split(",");
-            List<HashMap<String,String>> list = new ArrayList<>();
+            List<Currency> list = new ArrayList<>();
             for(String s:rateArray){
-                HashMap<String,String> map = new HashMap<>();
-                map.put("itemTitle",s.split(":")[0]);
-                map.put("itemDetail",s.split(":")[1]);
-                list.add(map);
+                Currency currency = new Currency();
+                currency.setName(s.split(":")[0]);
+                currency.setRate(s.split(":")[1]);
+                list.add(currency);
             }
-            listView.setAdapter(new SimpleAdapter(Main4Activity.this,
-                    list,
+            MyAdapter myAdapter = new MyAdapter(Main4Activity.this,
                     R.layout.list_item,
-                    new String[] {"itemTitle","itemDetail"},
-                    new int[] {R.id.itemTitle,R.id.itemDetail}));
+                    list);
+            listView.setAdapter(myAdapter);
+//            listView.setAdapter(new SimpleAdapter(Main4Activity.this,
+//                    list,
+//                    R.layout.list_item,
+//                    new String[] {"itemTitle","itemDetail"},
+//                    new int[] {R.id.itemTitle,R.id.itemDetail}));
         }
         //不是同一天则从网络中获取数据，写入新的数据和日期
         else{
@@ -111,16 +117,20 @@ public class Main4Activity extends AppCompatActivity implements Runnable{
             public void handleMessage(Message msg) {
                 if(msg.what == 2){
                     String allRate = "";
-                    List<HashMap<String,String>> list = (List<HashMap<String,String>>) msg.obj;
+                    List<Currency> list = (List<Currency>) msg.obj;
 
-                    listView.setAdapter(new SimpleAdapter(Main4Activity.this,
-                            list,
+                    MyAdapter myAdapter = new MyAdapter(Main4Activity.this,
                             R.layout.list_item,
-                            new String[] {"itemTitle","itemDetail"},
-                            new int[] {R.id.itemTitle,R.id.itemDetail}));
+                            list);
+//                    listView.setAdapter(new SimpleAdapter(Main4Activity.this,
+//                            list,
+//                            R.layout.list_item,
+//                            new String[] {"itemTitle","itemDetail"},
+//                            new int[] {R.id.itemTitle,R.id.itemDetail}));
+                    listView.setAdapter(myAdapter);
 
-                    for(HashMap<String,String> map:list){
-                        allRate += map.get("itemTitle") + ":" + map.get("itemDetail") + ",";
+                    for(Currency currency:list){
+                        allRate += currency.getName() + ":" + currency.getRate() + ",";
                     }
 
                     sp = getSharedPreferences("rate", Activity.MODE_PRIVATE);
@@ -188,30 +198,44 @@ public class Main4Activity extends AppCompatActivity implements Runnable{
             e.printStackTrace();
         }
 
-        List<HashMap<String,String>> message = getMessage(doc);
+        List<Currency> message = getMessage(doc);
 
         Message msg = handler.obtainMessage(2);
         msg.obj = message;
         handler.sendMessage(msg);
     }
 
-    private List<HashMap<String,String>> getMessage(Document doc){
+    private List<Currency> getMessage(Document doc){
         Elements tables = doc.getElementsByTag("table");
         Element table = tables.get(0);
 
-        List<HashMap<String,String>> list = new ArrayList<>();
+        List<Currency> list = new ArrayList<>();
 
         Elements trs = table.getElementsByTag("tr");
         Element e = null;
         for(int i = 1;i < trs.size();i++){
             e = trs.get(i);
-            HashMap<String,String> map = new HashMap<>();
-            map.put("itemTitle",e.getElementsByTag("td").get(0).text());
-            map.put("itemDetail",e.getElementsByTag("td").get(5).text());
-            list.add(map);
+            Currency currency = new Currency();
+            currency.setName(e.getElementsByTag("td").get(0).text());
+            currency.setRate(e.getElementsByTag("td").get(5).text());
+            list.add(currency);
         }
 
         return list;
 
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
+        Currency currency = (Currency) listView.getItemAtPosition(position);
+        String name = currency.getName();
+        String rate = currency.getRate();
+
+        Intent intent = new Intent(this,Main5Activity.class);
+        Bundle bundle = new Bundle();
+        bundle.putString("name",name);
+        bundle.putString("rate",rate);
+        intent.putExtras(bundle);
+        startActivityForResult(intent,1);
     }
 }
