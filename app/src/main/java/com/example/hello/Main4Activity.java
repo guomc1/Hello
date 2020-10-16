@@ -3,6 +3,8 @@ package com.example.hello;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.LocusId;
 import android.content.SharedPreferences;
@@ -33,13 +35,16 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
-public class Main4Activity extends AppCompatActivity implements Runnable, AdapterView.OnItemClickListener{
+public class Main4Activity extends AppCompatActivity implements Runnable, AdapterView.OnItemClickListener,AdapterView.OnItemLongClickListener{
 
     SharedPreferences sp;
     EditText editText1,editText2,editText3;
     ListView listView;
     Handler handler;
     String allRate,date;
+    MyAdapter myAdapter;
+    AlertDialog.Builder builder;
+    int position;
     double dollar,euro,won;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,6 +68,8 @@ public class Main4Activity extends AppCompatActivity implements Runnable, Adapte
 
         listView = findViewById(R.id.mylist);
         listView.setOnItemClickListener(this);
+        listView.setOnItemLongClickListener(this);
+        listView.setEmptyView(findViewById(R.id.noData));
 
         editText1.setText("dollar rate =" + dollar);
         editText2.setText("euro rate =" + euro);
@@ -87,7 +94,7 @@ public class Main4Activity extends AppCompatActivity implements Runnable, Adapte
                 currency.setRate(s.split(":")[1]);
                 list.add(currency);
             }
-            MyAdapter myAdapter = new MyAdapter(Main4Activity.this,
+            myAdapter = new MyAdapter(Main4Activity.this,
                     R.layout.list_item,
                     list);
             listView.setAdapter(myAdapter);
@@ -119,7 +126,7 @@ public class Main4Activity extends AppCompatActivity implements Runnable, Adapte
                     String allRate = "";
                     List<Currency> list = (List<Currency>) msg.obj;
 
-                    MyAdapter myAdapter = new MyAdapter(Main4Activity.this,
+                    myAdapter = new MyAdapter(Main4Activity.this,
                             R.layout.list_item,
                             list);
 //                    listView.setAdapter(new SimpleAdapter(Main4Activity.this,
@@ -226,7 +233,9 @@ public class Main4Activity extends AppCompatActivity implements Runnable, Adapte
     }
 
     @Override
-    public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
+    public void onItemClick(AdapterView<?> adapterView, View view, int i, long id) {
+        position = i;
+
         Currency currency = (Currency) listView.getItemAtPosition(position);
         String name = currency.getName();
         String rate = currency.getRate();
@@ -237,5 +246,23 @@ public class Main4Activity extends AppCompatActivity implements Runnable, Adapte
         bundle.putString("rate",rate);
         intent.putExtras(bundle);
         startActivityForResult(intent,1);
+    }
+
+    @Override
+    public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long id) {
+        position = i;
+
+        builder = new AlertDialog.Builder(this);
+        builder.setTitle("提示")
+                .setMessage("确认删除？")
+                .setPositiveButton("是", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        myAdapter.remove(listView.getItemAtPosition(position));
+                    }
+                })
+                .setNegativeButton("否",null);
+        builder.create().show();
+        return true;
     }
 }
