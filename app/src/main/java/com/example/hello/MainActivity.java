@@ -39,7 +39,7 @@ public class MainActivity extends AppCompatActivity implements Runnable{
     TextView textView;
     double dollar,euro,won;
     @Override
-    protected void onCreate(    Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main3);
 

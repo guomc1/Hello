@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.LocusId;
@@ -85,15 +86,17 @@ public class Main4Activity extends AppCompatActivity implements Runnable, Adapte
 
         //是同一天则直接从文件中读出数据
         if(date.equals(nowDate)){
-            allRate = sp.getString("allRate","");
-            String[] rateArray = allRate.split(",");
+//            allRate = sp.getString("allRate","");
+//            String[] rateArray = allRate.split(",");
             List<Currency> list = new ArrayList<>();
-            for(String s:rateArray){
-                Currency currency = new Currency();
-                currency.setName(s.split(":")[0]);
-                currency.setRate(s.split(":")[1]);
-                list.add(currency);
-            }
+//            for(String s:rateArray){
+//                Currency currency = new Currency();
+//                currency.setName(s.split(":")[0]);
+//                currency.setRate(s.split(":")[1]);
+//                list.add(currency);
+//            }
+            RateManager rateManager = new RateManager(getBaseContext());
+            list = rateManager.findAll();
             myAdapter = new MyAdapter(Main4Activity.this,
                     R.layout.list_item,
                     list);
@@ -136,14 +139,17 @@ public class Main4Activity extends AppCompatActivity implements Runnable, Adapte
 //                            new int[] {R.id.itemTitle,R.id.itemDetail}));
                     listView.setAdapter(myAdapter);
 
-                    for(Currency currency:list){
-                        allRate += currency.getName() + ":" + currency.getRate() + ",";
-                    }
+//                    for(Currency currency:list){
+//                        allRate += currency.getName() + ":" + currency.getRate() + ",";
+//                    }
 
-                    sp = getSharedPreferences("rate", Activity.MODE_PRIVATE);
-                    SharedPreferences.Editor editor = sp.edit();
-                    editor.putString("allRate",allRate);
-                    editor.apply();
+//                    sp = getSharedPreferences("rate", Activity.MODE_PRIVATE);
+//                    SharedPreferences.Editor editor = sp.edit();
+//                    editor.putString("allRate",allRate);
+//                    editor.apply();
+                    RateManager rateManager = new RateManager(getBaseContext());
+                    rateManager.deleteAll();
+                    rateManager.addAll(list);
                 }
                 super.handleMessage(msg);
             }
